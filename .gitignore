@@ -1,6 +1,7 @@
 dataset/*
 inputs/*
 outputs/*
+mlruns/*
 
 !dataset/.gitkeep
 !inputs/.gitkeep

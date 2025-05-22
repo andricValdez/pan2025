@@ -10,6 +10,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.metrics import accuracy_score, f1_score
 
+import utils
 
 def get_metrics(predicted, labels, target_names, subset='val'):
     print(f'Accuracy {subset}:', np.mean(predicted == labels))  
@@ -56,3 +57,14 @@ def main(train_set, val_set, test_set, models):
             model=model,
         )
         print('\n')
+
+if __name__ == '__main__':
+    train_set, val_set, test_set = utils.read_pan25_dataset(print_info=True)
+
+    models = [
+        {"algo": LinearSVC, "args": {"dual": "auto","random_state": 42}},
+        {"algo": LogisticRegression, "args": {}},
+        {"algo": SGDClassifier, "args": {}},
+    ]
+
+    main(train_set, val_set, test_set, models)

@@ -1,0 +1,57 @@
+NOTES
+
+USEFUL URLS:
+https://www.tira.io/t/how-to-use-very-big-models-e-g-large-language-models-from-hugging-face-on-a100-gpus-in-tira/2778
+
+************ Local test:
+    python main.py /c/Users/anvaldez/Documents/Docto/Projects/pan2024/inputs/test.jsonl /c/Users/anvaldez/Documents/Docto/Projects/pan2024/outputs
+
+    python main.py /c/Users/anvaldez/Documents/Docto/Projects/pan2024/inputs/Partition_A_test_set.jsonl /c/Users/anvaldez/Documents/Docto/Projects/pan2024/outputs
+
+    evaluator  /c/Users/anvaldez/Documents/Docto/Projects/pan2024/outputs/Model_A_clf_train_preds.jsonl  /c/Users/anvaldez/Documents/Docto/Projects/pan2024/inputs/Partition_A_test_truth.jsonl  /c/Users/anvaldez/Documents/Docto/Projects/pan2024/outputs
+
+    tira-run   --input-dataset generative-ai-authorship-verification-panclef-2024/pan24-generative-authorship-tiny-smoke-20240417-training   --image tira/submission-base-image:1.0.0   --command 'python main.py $inputDataset/dataset.jsonl $outputDir' 
+
+    tira-run --input-dataset generative-ai-authorship-verification-panclef-2025/pan25-generative-ai-detection-smoke-test-20250428-training --image tira/submission-base-image:1.0.0 --command 'python main.py $inputDataset/dataset.jsonl $outputDir' 
+
+    python main.py /home/avaldez/projects/pan-clef2025/dataset/pan25-generative-ai-detection-task1-train/original/val.jsonl /home/avaldez/projects/pan-clef2025/outputs/
+
+************ Local test USING LLMs:
+    tira-run --input-dataset generative-ai-authorship-verification-panclef-2025/pan25-generative-ai-detection-smoke-test-20250428-training --mount-hf-model microsoft/deberta-v3-base --image tira/submission-base-image:1.0.0 --command 'python main.py $inputDataset/dataset.jsonl $outputDir' 
+    
+
+************ TIRA - Delete tira-output folder:
+    docker run --rm -v $PWD:/data alpine sh -c "rm -rf /data/tira-output"
+    
+************ TIRA - Docker:
+    tira-cli login --token 88e9fc845833aa8dd697b08c209facaa3a996005aa6484f83a91e60f8ca51621
+
+    docker build -t tira/submission-base-image:1.0.0 -f Dockerfile .
+
+    tira-run   --input-dataset generative-ai-authorship-verification-panclef-2024/pan24-generative-authorship-tiny-smoke-20240417-training   --image tira/submission-base-image:1.0.0   --command 'python main.py $inputDataset/dataset.jsonl $outputDir' --push true
+
+
+************  EXEC PRED BASELINES
+
+    tira-run --image ghcr.io/pan-webis-de/pan24-generative-authorship-baselines:latest --input-dataset generative-ai-authorship-verification-panclef-2024/pan24-generative-authorship-smoke-20240411_0-training --command 'baseline binoculars $inputDataset/dataset.jsonl $outputDir'
+
+    docker run --rm \
+        -v /c/Users/anvaldez/Documents/Docto/Projects/pan2024/tira-output/test.jsonl:/dataset.jsonl \
+        -v /c/Users/anvaldez/Documents/Docto/Projects/pan2024/tira-output:/out \
+        --user=$(id -u) \
+        --gpus=all \
+        ghcr.io/pan-webis-de/pan24-generative-authorship-baselines:latest \
+        BASELINENAME ppmd /dataset.jsonl /out
+
+
+************  EXEC EVALUATOR BASELINES
+
+    evaluator  /c/Users/anvaldez/Documents/Docto/Projects/pan2024/outputs/answers.jsonl  /c/Users/anvaldez/Documents/Docto/Projects/pan2024/inputs/test_truth.jsonl  /c/Users/anvaldez/Documents/Docto/Projects/pan2024/outputs
+
+    docker run --rm \
+        -v /c/Users/anvaldez/Documents/Docto/Projects/pan2024/outputs/answers.jsonl:/answers.jsonl \
+        -v /c/Users/anvaldez/Documents/Docto/Projects/pan2024/inputs/test_truth.jsonl:/test_truth.jsonl \
+        -v /c/Users/anvaldez/Documents/Docto/Projects/pan2024/outputs:/out \
+        ghcr.io/pan-webis-de/pan24-generative-authorship-evaluator:latest \
+        evaluator /answers.jsonl /test_truth.jsonl /out
+
